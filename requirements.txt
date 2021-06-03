@@ -1,3 +1,4 @@
 streamlit
 uuid
-google.cloud
+gcsfs 
+google-cloud-storage
