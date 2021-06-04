@@ -57,15 +57,15 @@ if uploaded_file is not None:
             uploaded_file.name = 'test_file.png'
         uploaded_file = Image.open(uploaded_file)
         uploaded_file = adjust_image(uploaded_file)
-        with open(os.path.join('tempDir', uploaded_file.name), 'wb') as f:
+        with open(os.path.join('tempDir', uploaded_file.filename), 'wb') as f:
             f.write(uploaded_file.getbuffer())
         storage_client = storage.Client()
         bucket = storage_client.bucket('solarvision-test')
-        blob = bucket.blob(os.path.join('data/predict_image', uploaded_file.name))
-        blob.upload_from_filename(os.path.join('tempDir', uploaded_file.name)) 
+        blob = bucket.blob(os.path.join('data/predict_image', uploaded_file.filename))
+        blob.upload_from_filename(os.path.join('tempDir', uploaded_file.filename)) 
 
         url = 'https://solarvision-10-iq5yzqlj2q-ew.a.run.app/predict' 
-        params={'upload':os.path.join('data/predict_image', uploaded_file.name)}
+        params={'upload':os.path.join('data/predict_image', uploaded_file.filename)}
         response = requests.get(url, params).json()
         if response['test'] == 1:
             st.write('This rooftop has a solar panel') 
