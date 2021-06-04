@@ -3,4 +3,3 @@ uuid
 gcsfs 
 google-cloud-storage
 pillow 
-pickle
