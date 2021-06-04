@@ -13,11 +13,12 @@ st.markdown('''
 Please, upload an image with a rooftop and we will classify it depending if it has or not a solar panel.
 ''')
 
-uploaded_file = st.file_uploader(label='upload .jpg or .png file', type=['jpg', 'png']) 
+uploaded_file = st.file_uploader(label='upload .jpg or .png file', 
+                                 type=['jpg', 'png'])
 
 if uploaded_file is not None: 
 
-        st.image(uploaded_file, caption='Your image', use_column_width='auto')
+        st.image(uploaded_file, caption='Rooftop to predict', use_column_width='auto')
         #uploaded_file.name = str(uuid.uuid4())
         if uploaded_file.name[-3:] == 'jpg':
             uploaded_file.name = 'test_file.jpg' 
