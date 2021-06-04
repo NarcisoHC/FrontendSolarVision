@@ -1,9 +1,9 @@
 import streamlit as st
 import requests
 import os
-#import uuid
 from google.cloud import storage
 from PIL import Image
+import pickle
 
 
 st.set_option('deprecation.showfileUploaderEncoding', False)
@@ -17,7 +17,7 @@ Please, upload an image with a rooftop and we will classify it depending if it h
 def adjust_image(image):
     if image.size[0]==image.size[1]:
         if image.size[0]!=320:
-            image=im.resize((320,320))
+            image=image.resize((320,320))
         else:
             image=image
     else:
@@ -50,22 +50,20 @@ uploaded_file = st.file_uploader(label='upload .jpg or .png file',
 if uploaded_file is not None: 
 
         st.image(uploaded_file, caption='Rooftop to predict', use_column_width='auto')
-        #uploaded_file.name = str(uuid.uuid4())
+        uploaded_file2 = Image.open(uploaded_file)
+        uploaded_file2 = adjust_image(uploaded_file2)
         if uploaded_file.name[-3:] == 'jpg':
-            uploaded_file.name = 'test_file.jpg' 
+            uploaded_file2.filename = 'test_file.jpg' 
         if uploaded_file.name[-3:] == 'png': 
-            uploaded_file.name = 'test_file.png'
-        uploaded_file = Image.open(uploaded_file)
-        uploaded_file = adjust_image(uploaded_file)
-        with open(os.path.join('tempDir', uploaded_file.filename), 'wb') as f:
-            f.write(uploaded_file.getbuffer())
+            uploaded_file2.filename = 'test_file.png'
+        uploaded_file2.save(os.path.join('tempDir', uploaded_file2.filename))
         storage_client = storage.Client()
         bucket = storage_client.bucket('solarvision-test')
-        blob = bucket.blob(os.path.join('data/predict_image', uploaded_file.filename))
-        blob.upload_from_filename(os.path.join('tempDir', uploaded_file.filename)) 
+        blob = bucket.blob(os.path.join('data/predict_image', uploaded_file2.filename))
+        blob.upload_from_filename(os.path.join('tempDir', uploaded_file2.filename)) 
 
         url = 'https://solarvision-10-iq5yzqlj2q-ew.a.run.app/predict' 
-        params={'upload':os.path.join('data/predict_image', uploaded_file.filename)}
+        params={'upload':os.path.join('data/predict_image', uploaded_file2.filename)}
         response = requests.get(url, params).json()
         if response['test'] == 1:
             st.write('This rooftop has a solar panel') 
@@ -74,7 +72,5 @@ if uploaded_file is not None:
 
 else:
     st.write('Please, upload a file') 
-
-#then, after this file is sent to GCP, and is processed for prediction, we retreive the prediction from the API:
 
 
