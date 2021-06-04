@@ -10,7 +10,7 @@ install_requirements:
 # ----------------------------------
 
 streamlit:
-	-@streamlit run app.py
+	-@streamlit run app.py --server.maxUploadSize=1
 
 heroku_login:
 	-@heroku login
