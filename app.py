@@ -8,6 +8,7 @@ st.set_option('deprecation.showfileUploaderEncoding', False)
 
 st.title('SolarVision V1.0')
 
+
 st.markdown('''
 Please, upload an image with a rooftop and we will classify it depending if it has or not a solar panel.
 ''')
