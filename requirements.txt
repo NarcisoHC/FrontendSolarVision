@@ -2,3 +2,4 @@ streamlit
 uuid
 gcsfs 
 google-cloud-storage
+pillow 

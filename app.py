@@ -3,7 +3,7 @@ import requests
 import os
 #import uuid
 from google.cloud import storage
-#from PIL import Image
+from PIL import Image
 
 
 st.set_option('deprecation.showfileUploaderEncoding', False)
@@ -53,8 +53,9 @@ if uploaded_file is not None:
         #uploaded_file.name = str(uuid.uuid4())
         if uploaded_file.name[-3:] == 'jpg':
             uploaded_file.name = 'test_file.jpg' 
-        if uploaded_file.name[-3:] == 'png':
+        if uploaded_file.name[-3:] == 'png': 
             uploaded_file.name = 'test_file.png'
+        uploaded_file = Image.open(uploaded_file)
         uploaded_file = adjust_image(uploaded_file)
         with open(os.path.join('tempDir', uploaded_file.name), 'wb') as f:
             f.write(uploaded_file.getbuffer())
