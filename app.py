@@ -1,3 +1,4 @@
+from re import A
 import streamlit as st
 import requests
 import os
@@ -5,13 +6,33 @@ from google.cloud import storage
 from PIL import Image
 import pickle
 
+CSS = """
+h2 {
+    color: rgb(70, 119, 199);
+}
+body {
+    background-color: rgb(70, 119, 199);
+}
+.sidebar {
+        background-color: rgb(70, 119, 199))
+    }
+"""
+
+# Set options for the title bar
+st.set_page_config(
+            page_title="SolarVision",
+            page_icon="☀️",
+            layout="centered",
+            initial_sidebar_state="expanded")
+
+st.write(f'<style>{CSS}</style>', unsafe_allow_html=True)
 
 st.set_option('deprecation.showfileUploaderEncoding', False)
 
-st.title('SolarVision V1.0')
+st.title('Welcome to SolarVision V1.0')
 
 st.markdown('''
-Please upload an image of a rooftop and we will classify if there are solar panels or not.
+## **Upload an image of a rooftop and let us see wether we can find a solar panel!**
 ''')
 
 def adjust_image(image):
@@ -43,13 +64,21 @@ def adjust_image(image):
     
     return image 
 
+st.sidebar.markdown('''
+## Upload your image here
+''')
 
-uploaded_file = st.file_uploader(label='upload .jpg or .png file', 
-                                 type=['jpg', 'png'])
+uploaded_file = st.sidebar.file_uploader(label='', 
+                                 type=['jpg', 'png'], 
+                                 help='Our app suports image files in \
+                                 the formats JPG and PNG with a maximum size of 1 MB!')
+
+# build 2 columns to show the picture and the output side by side
+col1, col2 = st.beta_columns(2)
 
 if uploaded_file is not None: 
 
-    st.image(uploaded_file, use_column_width='auto')
+    col1.image(uploaded_file, use_column_width='auto')
     uploaded_file2 = Image.open(uploaded_file)
     uploaded_file2 = adjust_image(uploaded_file2)
     if uploaded_file.name[-3:] == 'jpg':
@@ -63,14 +92,16 @@ if uploaded_file is not None:
     blob.upload_from_filename(os.path.join('tempDir', uploaded_file2.filename)) 
 
     # Button to click to start prediction
-    if st.button('Make Prediction'):
+    if col2.button('Search for panels'):
         url = 'https://solarvision-10-iq5yzqlj2q-ew.a.run.app/predict' 
         params={'upload':os.path.join('data/predict_image', uploaded_file2.filename)}
         response = requests.get(url, params).json()
         if response['test'] == 1:
-            st.write('This rooftop has solar panels.') 
+            # show a green succes message for image with solar panel
+            col2.success('This rooftop has solar panels.') 
         else:
-            st.write('This rooftop does not have solar panels.')
+            # show a red error message for image without solar panel
+            col2.error('This rooftop does not have solar panels.')
 
 else:
     st.write('Please upload a file.')
