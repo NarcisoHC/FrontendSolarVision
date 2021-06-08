@@ -33,6 +33,7 @@ st.title('Welcome to SolarVision V1.7')
 
 st.sidebar.markdown('''
 ## Upload your image here
+
 ''')
 
 uploaded_file = st.sidebar.file_uploader(label='', 
@@ -63,6 +64,7 @@ if expander_upload.button(' Classification '):
 
     col1, col2 = st.beta_columns(2)
 
+
     if uploaded_file is not None:
 
         col1.image(uploaded_file, use_column_width='auto')
@@ -77,6 +79,7 @@ if expander_upload.button(' Classification '):
         bucket = storage_client.bucket('solarvision-test')
         blob = bucket.blob(os.path.join('data/predict_image', uploaded_file2.filename))
         blob.upload_from_filename(os.path.join('tempDir', uploaded_file2.filename)) 
+
 
         url = 'https://solarvision-10-iq5yzqlj2q-ew.a.run.app/predict' 
         params={'upload':os.path.join('data/predict_image', uploaded_file2.filename)}
