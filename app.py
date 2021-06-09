@@ -29,7 +29,8 @@ st.write(f'<style>{CSS}</style>', unsafe_allow_html=True)
 
 st.set_option('deprecation.showfileUploaderEncoding', False)
 
-st.title('Welcome to SolarVision V1.7')
+#st.title('Welcome to SolarVision V1.7')
+st.image("svlogo.png")
 
 st.sidebar.markdown('''
 ## Upload your image here
@@ -57,7 +58,7 @@ if st.sidebar.button('Search'):
 
 # build 2 columns to show the picture and the output side by side
 
-expander_upload = st.beta_expander("Classifying uploaded image")
+expander_upload = st.beta_expander("Classify uploaded image")
 
 if expander_upload.button(' Classification '):
 
@@ -89,7 +90,7 @@ if expander_upload.button(' Classification '):
             col2.error('This rooftop does not have solar panels.')
 
 
-expander_satellite = st.beta_expander("Looking for satellite footage around input address")
+expander_satellite = st.beta_expander("Use satellite footage around input address")
 
 if expander_satellite.button('Retrieve satellite footage'):
     images, image_names = get_satellite(geocode)
