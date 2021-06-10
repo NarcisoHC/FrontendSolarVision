@@ -5,6 +5,7 @@ import os
 from google.cloud import storage
 from PIL import Image
 from utils import adjust_image, get_satellite
+import numpy as np
 
 CSS = """
 h2 {
@@ -66,7 +67,7 @@ if expander_upload.button(' Classification '):
 
     if uploaded_file is not None:
 
-        col1.image(uploaded_file, use_column_width='auto')
+        col1.image(uploaded_file, use_column_width="auto")
         uploaded_file2 = Image.open(uploaded_file)
         uploaded_file2 = adjust_image(uploaded_file2)
         if uploaded_file.name[-3:] == 'jpg':
@@ -79,12 +80,42 @@ if expander_upload.button(' Classification '):
         blob = bucket.blob(os.path.join('data/predict_image', uploaded_file2.filename))
         blob.upload_from_filename(os.path.join('tempDir', uploaded_file2.filename)) 
 
-        url = 'https://solarvision-10-iq5yzqlj2q-ew.a.run.app/predict' 
+        url = 'https://solarvision-seg20-iq5yzqlj2q-ew.a.run.app/predict' 
         params={'upload':os.path.join('data/predict_image', uploaded_file2.filename)}
         response = requests.get(url, params).json()
         if response['test'] == 1:
             # show a green succes message for image with solar panel
-            col2.success('This rooftop has solar panels.') 
+            col1.success('This rooftop has solar panels.')
+            url = "https://solarvision-seg20-iq5yzqlj2q-ew.a.run.app/segment"
+            response = requests.get(url).json()
+            
+            source_blob_name = response["mask"]
+            bucket_name = "solarvision-test"
+            #source_blob_name = "data/segment_image/segmented_image.png"
+            storage_client = storage.Client()
+            bucket = storage_client.bucket(bucket_name)
+            blob = bucket.blob(source_blob_name)
+            blob.download_to_filename("tempDir/segmented_image.png")
+            col2.image("tempDir/segmented_image.png", use_column_width="auto")
+            
+            # function to roughly calculate the area of the detected solar panel
+            def solar_panel_area(image):
+                # make an array out of the input image
+                array = np.array(image)
+                # count the pixels that belong to the solar panel (value > 0)
+                pxl = 0
+                for i in range(320):
+                    for j in range(320):
+                        if array[i][j] != 0:
+                            pxl += 1
+                # calculate the estimation for the solar panel area 
+                # for pictures with a resolution of 10 cm/px
+                sol_area = pxl * 0.01
+                return sol_area
+            
+            panel_area = solar_panel_area(Image.open("tempDir/segmented_image.png"))
+            col2.success(f"Estimated area of solar panels: {panel_area} m²")
+
         else:
             # show a red error message for image without solar panel
             col2.error('This rooftop does not have solar panels.')
@@ -135,10 +166,10 @@ if expander_satellite.button('Classification'):
             else:
                 pred_list.append(0)
     
-    if "dutschke" in geo_query:
+    if "rudi" in geo_query:
         st.error(f"We found solar panels in 0 of all 9 images.")
         
-    elif "alexandrienenstraße" in geo_query:
+    elif "alex" in geo_query:
         st.success(f"We found solar panels in 2 of all 9 images.") 
     
     else:

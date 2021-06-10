@@ -3,3 +3,4 @@ uuid
 gcsfs 
 google-cloud-storage
 pillow 
+numpy
