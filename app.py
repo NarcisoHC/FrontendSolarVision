@@ -80,23 +80,12 @@ if expander_upload.button(' Classification '):
         blob = bucket.blob(os.path.join('data/predict_image', uploaded_file2.filename))
         blob.upload_from_filename(os.path.join('tempDir', uploaded_file2.filename)) 
 
-        url = 'https://solarvision-seg20-iq5yzqlj2q-ew.a.run.app/predict' 
+        url = 'https://solarvision-10-iq5yzqlj2q-ew.a.run.app/predict' 
         params={'upload':os.path.join('data/predict_image', uploaded_file2.filename)}
         response = requests.get(url, params).json()
         if response['test'] == 1:
             # show a green succes message for image with solar panel
             col1.success('This rooftop has solar panels.')
-            # url = "https://solarvision-seg20-iq5yzqlj2q-ew.a.run.app/segment"
-            # response = requests.get(url).json()
-            
-            # source_blob_name = response["mask"]
-            # bucket_name = "solarvision-test"
-            # #source_blob_name = "data/segment_image/segmented_image.png"
-            # storage_client = storage.Client()
-            # bucket = storage_client.bucket(bucket_name)
-            # blob = bucket.blob(source_blob_name)
-            # blob.download_to_filename("tempDir/segmented_image.png")
-            # col2.image("tempDir/segmented_image.png", use_column_width="auto")
             
             image = Image.open("tempDir/test_file.png").convert('RGB')
             image = np.array(image).reshape(320,320,3)/255
@@ -137,7 +126,7 @@ if expander_upload.button(' Classification '):
 
 expander_satellite = st.beta_expander("Use satellite footage around input address")
 
-if expander_satellite.button('Retrieve satellite footage'):
+if expander_satellite.button('Retrieve and classify satellite footage'):
     images, image_names = get_satellite(geocode)
     
     c1, c2, c3 = st.beta_columns((1, 1, 1))
@@ -156,18 +145,6 @@ if expander_satellite.button('Retrieve satellite footage'):
         st.image(images[2], use_column_width="auto")
         st.image(images[5], use_column_width="auto")
         st.image(images[8], use_column_width="auto")
-    
-if expander_satellite.button('Classification'):
-    
-    image_names = ['api_mapbox_0.jpeg', 
-                   'api_mapbox_1.jpeg', 
-                   'api_mapbox_2.jpeg',
-                   'api_mapbox_3.jpeg', 
-                   'api_mapbox_4.jpeg', 
-                   'api_mapbox_5.jpeg',
-                   'api_mapbox_6.jpeg', 
-                   'api_mapbox_7.jpeg', 
-                   'api_mapbox_8.jpeg']
         
     pred_list = []
 
