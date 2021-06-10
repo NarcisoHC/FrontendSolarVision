@@ -4,7 +4,7 @@ import requests
 import os
 from google.cloud import storage
 from PIL import Image
-from utils import adjust_image, get_satellite
+from utils import adjust_image, get_satellite, model
 import numpy as np
 
 CSS = """
@@ -86,16 +86,30 @@ if expander_upload.button(' Classification '):
         if response['test'] == 1:
             # show a green succes message for image with solar panel
             col1.success('This rooftop has solar panels.')
-            url = "https://solarvision-seg20-iq5yzqlj2q-ew.a.run.app/segment"
-            response = requests.get(url).json()
+            # url = "https://solarvision-seg20-iq5yzqlj2q-ew.a.run.app/segment"
+            # response = requests.get(url).json()
             
-            source_blob_name = response["mask"]
-            bucket_name = "solarvision-test"
-            #source_blob_name = "data/segment_image/segmented_image.png"
-            storage_client = storage.Client()
-            bucket = storage_client.bucket(bucket_name)
-            blob = bucket.blob(source_blob_name)
-            blob.download_to_filename("tempDir/segmented_image.png")
+            # source_blob_name = response["mask"]
+            # bucket_name = "solarvision-test"
+            # #source_blob_name = "data/segment_image/segmented_image.png"
+            # storage_client = storage.Client()
+            # bucket = storage_client.bucket(bucket_name)
+            # blob = bucket.blob(source_blob_name)
+            # blob.download_to_filename("tempDir/segmented_image.png")
+            # col2.image("tempDir/segmented_image.png", use_column_width="auto")
+            
+            image = Image.open("tempDir/test_file.png").convert('RGB')
+            image = np.array(image).reshape(320,320,3)/255
+
+            pretrained_model = model()
+            pretrained_model.load_weights('seg_model_weights.h5')
+            prediction = pretrained_model.predict(np.expand_dims(image, axis=0))[0]> 0.5
+            prediction = prediction * 255
+
+            im_array = prediction.reshape(320,320).astype(np.uint8)
+            test = Image.fromarray(im_array)
+            test.save("tempDir/segmented_image.png")
+            
             col2.image("tempDir/segmented_image.png", use_column_width="auto")
             
             # function to roughly calculate the area of the detected solar panel
@@ -113,7 +127,7 @@ if expander_upload.button(' Classification '):
                 sol_area = pxl * 0.01
                 return sol_area
             
-            panel_area = solar_panel_area(Image.open("tempDir/segmented_image.png"))
+            panel_area = round(solar_panel_area(Image.open("tempDir/segmented_image.png")), 2)
             col2.success(f"Estimated area of solar panels: {panel_area} m²")
 
         else:

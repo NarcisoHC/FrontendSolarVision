@@ -4,3 +4,4 @@ gcsfs
 google-cloud-storage
 pillow 
 numpy
+tensorflow

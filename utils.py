@@ -3,6 +3,11 @@ import os
 from PIL import Image
 from google.cloud import storage
 
+from tensorflow.keras.layers import Conv2D, Activation, BatchNormalization
+from tensorflow.keras.layers import UpSampling2D, Input, Concatenate
+from tensorflow.keras.models import Model
+from tensorflow.keras.applications import MobileNetV2
+
 
 def adjust_image(image):
     if image.size[0]==image.size[1]:
@@ -66,3 +71,33 @@ def get_satellite(geocode):
         images.append(image)
     
     return images, image_names
+
+
+
+def model():
+    inputs = Input(shape=(320, 320, 3), name="input_image")
+    
+    encoder = MobileNetV2(input_tensor=inputs, weights="imagenet", include_top=False, alpha=0.35)
+    skip_connection_names = ["input_image", "block_1_expand_relu", "block_3_expand_relu", "block_6_expand_relu"]
+    encoder_output = encoder.get_layer("block_13_expand_relu").output
+    
+    f = [16, 32, 48, 64]
+    x = encoder_output
+    for i in range(1, len(skip_connection_names)+1, 1):
+        x_skip = encoder.get_layer(skip_connection_names[-i]).output
+        x = UpSampling2D((2, 2))(x)
+        x = Concatenate()([x, x_skip])
+        
+        x = Conv2D(f[-i], (3, 3), padding="same")(x)
+        x = BatchNormalization()(x)
+        x = Activation("relu")(x)
+        
+        x = Conv2D(f[-i], (3, 3), padding="same")(x)
+        x = BatchNormalization()(x)
+        x = Activation("relu")(x)
+        
+    x = Conv2D(1, (1, 1), padding="same")(x)
+    x = Activation("sigmoid")(x)
+    
+    model = Model(inputs, x)
+    return model
